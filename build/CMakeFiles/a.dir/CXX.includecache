@@ -1,0 +1,12 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/luma/work/gtest-hoge/a.cpp
+gtest/gtest.h
+C:/Users/luma/work/gtest-hoge/gtest/gtest.h
+
