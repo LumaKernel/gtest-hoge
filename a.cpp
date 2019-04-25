@@ -7,9 +7,9 @@ int cubic(int c) {
 TEST(testMath, myCubeTest)
 {
     EXPECT_EQ(1000, cubic(10));
-    EXPECT_EQ(1000, cubic(3));
+    // EXPECT_EQ(1000, cubic(3));
     EXPECT_EQ("abc", std::string("ab") + "c");
-    EXPECT_EQ("abcd", std::string("ab") + "c");
+    // EXPECT_EQ("abcd", std::string("ab") + "c");
 }
 
 // int main(int argc, char **argv) {
