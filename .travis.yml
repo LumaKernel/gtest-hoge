@@ -59,6 +59,7 @@ before_script:
   - sudo cp *.a /usr/lib
   - popd
 script:
+  - cmake --version
   - install -d build
   - cd build
   # - cmake -DCMAKE_CXX_COMPILER=$COMPIER -DPYTHON_LIBRARY=/usr/lib/python3.7 ..
