@@ -58,7 +58,7 @@ before_script:
 script:
   - install -d build
   - cd build
-  - cmake -DCMAKE_CXX_COMPILER=$COMPIER -PYTHON_LIBRARY=/usr/lib/python3.7 ..
+  - cmake -DCMAKE_CXX_COMPILER=$COMPIER -DPYTHON_LIBRARY=/usr/lib/python3.7 ..
   - make VERBOSE=1
   - make test
 after_success:
