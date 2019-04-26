@@ -1,6 +1,6 @@
 language: cpp
 sudo: required
-dist: xenial\
+# dist: xenial\
 matrix:
   include:
     - compiler: gcc
@@ -54,8 +54,7 @@ before_install:
 
   # cmake
   - which cmake
-  - sudo apt-get purge cmake
-  # - sudo apt remove --purge --auto-remove cmake
+  - apt search cmake
   - cmake --version
   # - wget https://github.com/Kitware/CMake/releases/download/v3.14.3/cmake-3.14.3.tar.gz
   # - tar xf cmake-3.14.3.tar.gz
