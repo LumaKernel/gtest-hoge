@@ -26,12 +26,10 @@ add_test(
   )
 
 include(CodeCoverage)
-# setup_target_for_coverage(${PROJECT_NAME}_coverage poptests coverage)
-# setup_target_for_coverage_cobertura(${PROJECT_NAME}_cobertura poptests coverage --gtest_output=xml:coverage.junit.xml)
 
-APPEND_COVERAGE_COMPILER_FLAGS()
+append_coverage_compiler_flags()
 
-SETUP_TARGET_FOR_COVERAGE_GCOVR_HTML(
+setup_target_for_coverage_gcovr_html(
     NAME ac                    # New target name
     EXECUTABLE a -j ${PROCESSOR_COUNT} # Executable in PROJECT_BINARY_DIR
     DEPENDENCIES a         # Dependencies to build first
