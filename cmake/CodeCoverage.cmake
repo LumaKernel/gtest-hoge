@@ -116,6 +116,7 @@ mark_as_advanced(
 
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(WARNING "Code coverage results with an optimised (non-Debug) build may be misleading")
+    message(WARNING "Rerun as cmake -DCMAKE_BUILD_TYPE=Debug ..")
 endif() # NOT CMAKE_BUILD_TYPE STREQUAL "Debug"
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
@@ -283,7 +284,7 @@ function(SETUP_TARGET_FOR_COVERAGE_GCOVR_HTML)
         COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/${Coverage_NAME}
 
         # Running gcovr
-        COMMAND ${Python_FOUND} -m gcovr --html --html-details
+        COMMAND ${Python_EXECUTABLE} -m gcovr --html --html-details
         # COMMAND ${GCOVR_PATH} --html --html-details
             -r ${PROJECT_SOURCE_DIR} ${GCOVR_EXCLUDES}
             --object-directory=${PROJECT_BINARY_DIR}
