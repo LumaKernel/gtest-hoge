@@ -5,6 +5,7 @@ matrix:
     - compiler: gcc
       addons:
         apt:
+          update: true
           sources:
             # 特定のg++のバージョンを入れるのに必要
             # 実体は sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
