@@ -1,6 +1,6 @@
 language: cpp
 sudo: required
-# dist: xenial\
+dist: xenial\
 matrix:
   include:
     - compiler: gcc
@@ -64,6 +64,7 @@ before_install:
   - sudo apt install cmake
 
 before_script:
+  - sudo apt-get install libgtest-dev
   - install -d gtest_build
   - pushd gtest_build
   - cmake -DCMAKE_CXX_COMPILER=$COMPILER /usr/src/gtest/
