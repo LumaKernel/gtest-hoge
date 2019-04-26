@@ -5,8 +5,10 @@ matrix:
     - compiler: gcc
       addons:
         apt:
-          # sources:
-            # - ubuntu-toolchain-r-test
+          sources:
+            # 特定のg++のバージョンを入れるのに必要
+            # 実体は sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+            - ubuntu-toolchain-r-test
             # - george-edison55-precise-backports
           packages:
             - g++-5
