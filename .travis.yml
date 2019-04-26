@@ -15,7 +15,6 @@ matrix:
             - cmake
             # - cmake-data
             - libgtest-dev
-            - python
       env: COMPILER=g++-5
     # - compiler: clang
     #   addons:
@@ -45,6 +44,7 @@ matrix:
     #   env: COMPILER=clang++-3.7
 
 before_install:
+  - sudo apt install python
   - pip install --user gcovr
   - pip install --user cpp-coveralls
 
@@ -58,7 +58,7 @@ before_script:
 script:
   - install -d build
   - cd build
-  - cmake -DCMAKE_CXX_COMPILER=$COMPIER ..
+  - cmake -DCMAKE_CXX_COMPILER=$COMPIER -PYTHON_LIBRARY=/usr/lib/python3.7 ..
   - make VERBOSE=1
   - make test
 after_success:
