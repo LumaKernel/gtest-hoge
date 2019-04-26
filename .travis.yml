@@ -15,6 +15,7 @@ matrix:
             - cmake
             # - cmake-data
             - libgtest-dev
+            - python
       env: COMPILER=g++-5
     # - compiler: clang
     #   addons:
@@ -42,6 +43,10 @@ matrix:
     #         - cmake-data
     #         - libgtest-dev
     #   env: COMPILER=clang++-3.7
+
+before_install:
+  - pip install --user gcovr
+  - pip install --user cpp-coveralls
 
 before_script:
   - install -d gtest_build
