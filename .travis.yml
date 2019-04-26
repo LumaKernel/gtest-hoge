@@ -13,8 +13,9 @@ matrix:
           packages:
             - g++-5
             - cmake
-            - cmake-data
+            # - cmake-data
             - libgtest-dev
+            - python3-dev
       env: COMPILER=g++-5
     # - compiler: clang
     #   addons:
@@ -44,7 +45,7 @@ matrix:
     #   env: COMPILER=clang++-3.7
 
 before_install:
-  - sudo apt install python
+  # - sudo apt install python
   - pip install --user gcovr
   - pip install --user cpp-coveralls
 
