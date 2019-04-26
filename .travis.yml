@@ -12,7 +12,7 @@ matrix:
             # - george-edison55-precise-backports
           packages:
             - g++-5
-            - cmake
+            # - cmake
             # - cmake-data
             - libgtest-dev
             - python3-dev
@@ -48,6 +48,8 @@ before_install:
   # - sudo apt install python
   - pip install --user gcovr
   - pip install --user cpp-coveralls
+  # cmake
+  - wget https://cmake.org/files/v3.4/cmake-3.4.0-rc3.tar.gz
 
 before_script:
   - install -d gtest_build

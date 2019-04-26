@@ -35,3 +35,4 @@ setup_target_for_coverage_gcovr_html(
     DEPENDENCIES a         # Dependencies to build first
 )
 
+
