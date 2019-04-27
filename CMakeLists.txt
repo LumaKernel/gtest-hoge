@@ -15,7 +15,7 @@ find_package(GTest REQUIRED)
 
 file(GLOB SOURCES src/**/*.cpp src/*.cpp)
 
-include(COVERALLS)
+include(Coveralls) # ファイルシステムによってケースセンシティブ
 coveralls_turn_on_coverage()
 
 # Create the coveralls target.
