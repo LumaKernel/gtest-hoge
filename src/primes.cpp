@@ -4,16 +4,15 @@
 std::vector< int > primes(int n) {
   std::vector< int > res;
   for(int i = 2; i <= n; ++i) {
-    bool isp = 1;
+    bool is_prime = 1;
     for(int p : res) {
-      // if(static_cast<long long>(p) * p > i) break;
-      if(static_cast<long long>(p * p) > i) break;
+      if(static_cast<long long>(p) * p > i) break;
       if(i % p == 0) {
-        isp = 0;
+        is_prime = 0;
         break;
       }
     }
-    if(isp) res.emplace_back(i);
+    if(is_prime) res.emplace_back(i);
   }
   return res;
 }

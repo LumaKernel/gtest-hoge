@@ -9,14 +9,20 @@ long long rangesum(long long l, long long r) {
 
 long long rangesum(long long l, long long r, long long step) {
   if(l == r) return l;
-  assert(step != 0);
+  struct DO_NOT_ZEROSTEP_WITH_NONZERO_RANGE{} ex;
+  if(step == 0) throw ex;
   
-  if(step < 0) step = -step, std::swap(l, r);
+  if(step > 0) {
+    if(l > r) return l;
 
-  if(l > r) return l;
-  
-  auto n = (r - l + 1 + step - 1) / step;
-  return n * l + n * (n - 1) / 2 * step;
+    auto n = (r - l + 1 + step - 1) / step;
+    return n * l + n * (n - 1) / 2 * step;
+  } else {
+    if(l < r) return l;
+
+    auto n = (l - r + 1 + -step - 1) / -step;
+    return n * l + n * (n - 1) / 2 * step;
+  }
 }
 // }}}
 

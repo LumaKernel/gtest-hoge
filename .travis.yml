@@ -9,7 +9,7 @@ matrix:
     - compiler: gcc
       addons:
         apt:
-          update: true
+          # update: true # apt update をしてくれる
           sources:
             # 特定のg++のバージョンを入れるのに必要
             # 実体は sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
@@ -19,37 +19,21 @@ matrix:
             - g++-5
             - libgtest-dev
             - python3-dev
-      env: COMPILER=g++-5
-    # - compiler: clang
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #         - llvm-toolchain-precise-3.6
-    #         - george-edison55-precise-backports
-    #       packages:
-    #         - clang-3.6
-    #         - cmake
-    #         - cmake-data
-    #         - libgtest-dev
-    #   env: COMPILER=clang++-3.6
-    # - compiler: clang
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #         - llvm-toolchain-precise-3.7
-    #         - george-edison55-precise-backports
-    #       packages:
-    #         - clang-3.7
-    #         - cmake
-    #         - cmake-data
-    #         - libgtest-dev
-    #   env: COMPILER=clang++-3.7
+      env:
+        - COMPILER=g++-5
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+          packages:
+            - clang-3.7
+            - libgtest-dev
+      env:
+        - COMPILER=clang++-3.7
 
 before_install:
-
-  # - sudo apt install python
   - pip install --user gcovr
   - pip install --user cpp-coveralls
 
