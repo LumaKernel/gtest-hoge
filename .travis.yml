@@ -26,12 +26,12 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-xenial-3.7
+            - llvm-toolchain-xenial-7
           packages:
-            - clang-3.7
+            - clang-7
             - libgtest-dev
       env:
-        - COMPILER=clang++-3.7
+        - COMPILER=clang++-7
 
 before_install:
   - pip install --user gcovr
