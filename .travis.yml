@@ -1,10 +1,15 @@
 # 原因特定中
-# matrix.include が原因か?
+# 問題点 : APT が実行されない
+
+# yml を変えるだけで解決する
+
+# os:linux が必要 ?
 
 
 # 新しいバージョンのcmakeが欲しいから xenial を使う
 # cmake 3.12 以降が入っているはず
 dist: xenial\
+os: linux
 language: cpp
 
 sudo: required
@@ -23,14 +28,12 @@ env:
 addons:
   apt:
     sources:
-    - llvm-toolchain-xenial-7
-    - ubuntu-toolchain-r-test
+      - llvm-toolchain-xenial-7
+      - ubuntu-toolchain-r-test
     packages:
-    - clang-7
-    - cmake
-    - gcc-8
-    - g++-8
-    - ninja-build
+      - g++-5
+      - clang-7
+      - libgtest-dev
 
 # addons:
 #   apt:
@@ -56,7 +59,7 @@ addons:
 #       env:
 #         - COMPILER=clang++-7
 
-before_install:
+install:
   - pip install --user gcovr
   - pip install --user cpp-coveralls
 
@@ -68,6 +71,7 @@ before_script:
   - sudo cp *.a /usr/lib
   - popd
   - rm gtest_build -rf
+
 script:
   - cmake --version
   - install -d build
@@ -81,6 +85,7 @@ script:
 
   # popするのは大事
   - popd
+
 after_success:
   - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
 
