@@ -4,32 +4,38 @@ sudo: required
 # cmake 3.12 以降が入っているはず
 dist: xenial\
 
+env:
+  global:
+    - GTEST_COLOR=1
+
+addons:
+  apt:
+    # update: true # apt update をしてくれる
+    sources:
+      - llvm-toolchain-xenial-7
+      # 特定のg++のバージョンを入れるのに必要
+      # 実体は sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+      - ubuntu-toolchain-r-test
+      # - george-edison55-precise-backports # cmake 3.2 とかを入れるのに使う
+    packages:
+      - clang-7
+      - libgtest-dev
+
 matrix:
   include:
     - compiler: gcc
       addons:
         apt:
-          # update: true # apt update をしてくれる
-          sources:
-            # 特定のg++のバージョンを入れるのに必要
-            # 実体は sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-            - ubuntu-toolchain-r-test
-            # - george-edison55-precise-backports # cmake 3.2 とかを入れるのに使う
           packages:
             - g++-5
-            - libgtest-dev
             - python3-dev
       env:
         - COMPILER=g++-5
     - compiler: clang
       addons:
         apt:
-          sources:
-            - llvm-toolchain-xenial-7
-            - ubuntu-toolchain-r-test
           packages:
             - clang-7
-            - libgtest-dev
       env:
         - COMPILER=clang++-7
 
@@ -51,7 +57,11 @@ script:
   - pushd build
   - cmake -DCMAKE_CXX_COMPILER=$COMPIER ..
   - make VERBOSE=1
-  - make test VERBOSE=1
+
+  # make test だと結果が表示されない
+  # 失敗したものだけ表示するなら --output-on-failure
+  - ctest -V
+
   # popするのは大事
   - popd
 after_success:
