@@ -1,0 +1,4 @@
+ls | grep -v -E "^t|u$" | xargs rm -rf
+cmake -G "MSYS Makefiles" .. && make
+export GTEST_COLOR=1
+ctest --output-on-failure
