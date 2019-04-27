@@ -74,16 +74,15 @@ before_script:
 script:
   - cmake --version
   - install -d build
-  - cd build
+  - pushd build
   # - cmake -DCMAKE_CXX_COMPILER=$COMPIER -DPYTHON_LIBRARY=/usr/lib/python3.7 ..
   - cmake -DCMAKE_CXX_COMPILER=$COMPIER ..
   - make VERBOSE=1
   - make test
+  - popd
 after_success:
   # - coveralls --exclude lib --exclude tests --gcov-options '\-lp'
   # - coveralls --gcov-options '\-lp'
   # - make coveralls
-  - pwd
-  - cd build
   - coveralls --exclude lib --exclude tests --gcov-options '\-lp'
 
