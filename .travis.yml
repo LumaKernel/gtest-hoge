@@ -4,6 +4,7 @@
 # yml を変えるだけで解決する
 
 # os:linux が必要 ?
+# install 以下 + addons を動くやつに変える
 
 
 # 新しいバージョンのcmakeが欲しいから xenial を使う
@@ -24,16 +25,6 @@ env:
   matrix:
     - COMPILER=g++-5
     - COMPILER=clang++-7
-
-addons:
-  apt:
-    sources:
-      - llvm-toolchain-xenial-7
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-5
-      - clang-7
-      - libgtest-dev
 
 # addons:
 #   apt:
@@ -59,33 +50,55 @@ addons:
 #       env:
 #         - COMPILER=clang++-7
 
-install:
-  - pip install --user gcovr
-  - pip install --user cpp-coveralls
+# addons:
+#   apt:
+#     sources:
+#       - llvm-toolchain-xenial-7
+#       - ubuntu-toolchain-r-test
+#     packages:
+#       - g++-5
+#       - clang-7
+#       - libgtest-dev
+#
+# install:
+#   - pip install --user gcovr
+#   - pip install --user cpp-coveralls
+#
+# before_script:
+#   - install -d gtest_build
+#   - pushd gtest_build
+#   - cmake -DCMAKE_CXX_COMPILER=$COMPILER /usr/src/gtest/
+#   - make
+#   - sudo cp *.a /usr/lib
+#   - popd
+#   - rm gtest_build -rf
+#
+# script:
+#   - cmake --version
+#   - install -d build
+#   - pushd build
+#   - cmake -DCMAKE_CXX_COMPILER=$COMPIER ..
+#   - make VERBOSE=1
+#
+#   # make test だと結果が表示されない
+#   # 失敗したものだけ表示するなら --output-on-failure
+#   - ctest -V
+#
+#   # popするのは大事
+#   - popd
+#
+# after_success:
+#   - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
 
-before_script:
-  - install -d gtest_build
-  - pushd gtest_build
-  - cmake -DCMAKE_CXX_COMPILER=$COMPILER /usr/src/gtest/
-  - make
-  - sudo cp *.a /usr/lib
-  - popd
-  - rm gtest_build -rf
 
-script:
-  - cmake --version
-  - install -d build
-  - pushd build
-  - cmake -DCMAKE_CXX_COMPILER=$COMPIER ..
-  - make VERBOSE=1
+addons:
+  apt:
+    sources:
+      - llvm-toolchain-xenial-7
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-5
+      - clang-7
+      - libgtest-dev
 
-  # make test だと結果が表示されない
-  # 失敗したものだけ表示するなら --output-on-failure
-  - ctest -V
-
-  # popするのは大事
-  - popd
-
-after_success:
-  - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
 
