@@ -4,7 +4,7 @@
 #include <cassert>
 #include <utility>
 long long rangesum(long long l, long long r) {
-  return (r + l) * (r - l + 1);
+  return (r + l) * (r - l + 1) / 2;
 }
 
 long long rangesum(long long l, long long r, long long step) {
