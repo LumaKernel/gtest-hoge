@@ -1,5 +1,4 @@
 file(GLOB TESTS **/*.cpp *.cpp)
-# set(TESTFILES primes.cpp )
 
 set(TEST_MAIN unit_tests)
 set(TEST_RUNNER_PARMS "--gtest_color=yes")

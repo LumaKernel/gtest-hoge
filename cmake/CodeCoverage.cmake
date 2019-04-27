@@ -308,6 +308,8 @@ function(SETUP_TARGET_FOR_COVERAGE_GCOVR_HTML)
       set(OPEN_COMMAND start)
     elseif(APPLE)
       set(OPEN_COMMAND open)
+    elseif(UNIX)
+      set(OPEN_COMMAND open)
     endif()
 
     if(${Coverage_AUTO_OPEN})
