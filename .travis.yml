@@ -9,17 +9,66 @@
 
 # 新しいバージョンのcmakeが欲しいから xenial を使う
 # cmake 3.12 以降が入っているはず
-dist: xenial\
-os:
-  - linux
-  - osx
-language: cpp
 
-sudo: required
+dist: xenial
+language: cpp
 
 compiler:
   - gcc
   - clang
+os:
+  - linux
+  - osx
+
+env:
+  - GLOG=1 SHARED_LIB=0 BUILD_TYPE=Debug
+  - GLOG=1 SHARED_LIB=0 BUILD_TYPE=RelWithDebInfo
+  - GLOG=0 SHARED_LIB=0 BUILD_TYPE=Debug
+  - GLOG=0 SHARED_LIB=0 BUILD_TYPE=RelWithDebInfo
+  - GLOG=0 SHARED_LIB=1 BUILD_TYPE=Debug
+  - GLOG=0 SHARED_LIB=1 BUILD_TYPE=RelWithDebInfo
+  - GLOG=0 SHARED_LIB=0 PIC=1 BUILD_TYPE=Debug
+  - GLOG=0 SHARED_LIB=0 PIC=1 BUILD_TYPE=RelWithDebInfo
+
+
+matrix:
+  exclude:
+    # GCC fails on recent Travis OSX images.
+    # https://github.com/travis-ci/travis-ci/issues/9640
+    - compiler: gcc
+      os: osx
+
+addons:
+  apt:
+    sources:
+    - llvm-toolchain-xenial-7
+    - ubuntu-toolchain-r-test
+    packages:
+    - clang-7
+    - cmake
+    - gcc-8
+    - g++-8
+    - ninja-build
+  homebrew:
+    packages:
+    - cmake
+    - gcc@8
+    - ninja
+
+
+
+
+# dist: xenial\
+# os:
+#   - linux
+#   - osx
+# language: cpp
+#
+# sudo: required
+#
+# compiler:
+#   - gcc
+#   - clang
 
 # env:
 #   global:
@@ -91,16 +140,5 @@ compiler:
 #
 # after_success:
 #   - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
-
-
-addons:
-  apt:
-    sources:
-      - llvm-toolchain-xenial-7
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-5
-      - clang-7
-      - libgtest-dev
 
 
