@@ -57,5 +57,5 @@ script:
   # popするのは大事
   - popd
 after_success:
-  - coveralls --exclude build --exclude test --gcov-options '\-lp'
+  - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
 
