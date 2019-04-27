@@ -10,7 +10,9 @@
 # 新しいバージョンのcmakeが欲しいから xenial を使う
 # cmake 3.12 以降が入っているはず
 dist: xenial\
-os: linux
+os:
+  - linux
+  - osx
 language: cpp
 
 sudo: required
@@ -19,12 +21,12 @@ compiler:
   - gcc
   - clang
 
-env:
-  global:
-    - GTEST_COLOR=1
-  matrix:
-    - COMPILER=g++-5
-    - COMPILER=clang++-7
+# env:
+#   global:
+#     - GTEST_COLOR=1
+#   matrix:
+#     - COMPILER=g++-5
+#     - COMPILER=clang++-7
 
 # addons:
 #   apt:
