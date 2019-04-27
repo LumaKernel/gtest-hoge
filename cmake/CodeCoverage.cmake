@@ -255,9 +255,9 @@ endfunction() # SETUP_TARGET_FOR_COVERAGE_GCOVR_XML
 # )
 function(SETUP_TARGET_FOR_COVERAGE_GCOVR_HTML)
 
-    set(options NONE)
+    set(options AUTO_OPEN)
     set(oneValueArgs NAME)
-    set(multiValueArgs EXECUTABLE EXECUTABLE_ARGS DEPENDENCIES)
+    set(multiValueArgs EXECUTABLE EXECUTABLE_ARGS DEPENDENCIES FILTERS)
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT Python_FOUND)
@@ -276,6 +276,13 @@ function(SETUP_TARGET_FOR_COVERAGE_GCOVR_HTML)
         list(APPEND GCOVR_EXCLUDES "${EXCLUDE_REPLACED}")
     endforeach()
 
+    set(GCOVR_FILTERS "")
+    foreach(FILTER ${Coverage_FILTERS})
+      string(REPLACE "*" "\\*" FILTER_REPLACED ${FILTER})
+      list(APPEND GCOVR_FILTERS "-f")
+      list(APPEND GCOVR_FILTERS "${FILTER_REPLACED}")
+    endforeach()
+
     add_custom_target(${Coverage_NAME}
         # Run tests
         ${Coverage_EXECUTABLE} ${Coverage_EXECUTABLE_ARGS}
@@ -286,7 +293,9 @@ function(SETUP_TARGET_FOR_COVERAGE_GCOVR_HTML)
         # Running gcovr
         COMMAND ${Python_EXECUTABLE} -m gcovr --html --html-details
         # COMMAND ${GCOVR_PATH} --html --html-details
-            -r ${PROJECT_SOURCE_DIR} ${GCOVR_EXCLUDES}
+            -r ${PROJECT_SOURCE_DIR}
+            ${GCOVR_FILTERS}
+            ${GCOVR_EXCLUDES}
             --object-directory=${PROJECT_BINARY_DIR}
             -o ${Coverage_NAME}/index.html
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
@@ -295,10 +304,24 @@ function(SETUP_TARGET_FOR_COVERAGE_GCOVR_HTML)
     )
 
     # Show info where to find the report
-    add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
+    if(WIN32)
+      set(OPEN_COMMAND start)
+    elseif(APPLE)
+      set(OPEN_COMMAND open)
+    endif()
+
+    if(${Coverage_AUTO_OPEN})
+      add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
+        COMMAND ${OPEN_COMMAND} ${PROJECT_BINARY_DIR}/${Coverage_NAME}/index.html
+        COMMENT "Auto-opened ./${Coverage_NAME}/index.html"
+        )
+    else()
+      add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
         COMMAND ;
         COMMENT "Open ./${Coverage_NAME}/index.html in your browser to view the coverage report."
-    )
+        )
+    endif()
+
 
 endfunction() # SETUP_TARGET_FOR_COVERAGE_GCOVR_HTML
 

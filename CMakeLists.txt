@@ -13,7 +13,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -Wextra -Wpedantic")
 find_package(GTest REQUIRED)
 # }}}
 
-# file(GLOB SOURCES src/**/*.cpp)
+file(GLOB SOURCES src/**/*.cpp src/*.cpp)
+
+include(COVERALLS)
+coveralls_turn_on_coverage()
+
+# Create the coveralls target.
+coveralls_setup(
+  "${SOURCES}" # The source files.
+  ON                 # If we should upload.
+  )
 
 # ヘッダーとかがおいてある include/ 的なファイルの探し先を指定する
 # include_directories(src) # ?
