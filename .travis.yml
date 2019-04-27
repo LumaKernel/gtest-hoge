@@ -1,34 +1,24 @@
-# Build matrix / environment variable are explained on:
-# http://about.travis-ci.org/docs/user/build-configuration/
-# This file can be validated on: http://lint.travis-ci.org/
+# 原因特定中
+# matrix.include が原因か?
 
-dist: xenial
+
+# 新しいバージョンのcmakeが欲しいから xenial を使う
+# cmake 3.12 以降が入っているはず
+dist: xenial\
 language: cpp
+
+sudo: required
 
 compiler:
   - gcc
   - clang
-os:
-  - linux
-  - osx
 
 env:
-  - GLOG=1 SHARED_LIB=0 BUILD_TYPE=Debug
-  - GLOG=1 SHARED_LIB=0 BUILD_TYPE=RelWithDebInfo
-  - GLOG=0 SHARED_LIB=0 BUILD_TYPE=Debug
-  - GLOG=0 SHARED_LIB=0 BUILD_TYPE=RelWithDebInfo
-  - GLOG=0 SHARED_LIB=1 BUILD_TYPE=Debug
-  - GLOG=0 SHARED_LIB=1 BUILD_TYPE=RelWithDebInfo
-  - GLOG=0 SHARED_LIB=0 PIC=1 BUILD_TYPE=Debug
-  - GLOG=0 SHARED_LIB=0 PIC=1 BUILD_TYPE=RelWithDebInfo
-
-
-matrix:
-  exclude:
-    # GCC fails on recent Travis OSX images.
-    # https://github.com/travis-ci/travis-ci/issues/9640
-    - compiler: gcc
-      os: osx
+  global:
+    - GTEST_COLOR=1
+  matrix:
+    - COMPILER=g++-5
+    - COMPILER=clang++-7
 
 addons:
   apt:
@@ -41,35 +31,56 @@ addons:
     - gcc-8
     - g++-8
     - ninja-build
-  homebrew:
-    packages:
-    - cmake
-    - gcc@8
-    - ninja
+
+# addons:
+#   apt:
+#     # update: true # apt update をしてくれる
+#     sources:
+#       # 特定のg++のバージョンを入れるのに必要
+#       # 実体は sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+#       - ubuntu-toolchain-r-test
+#       - llvm-toolchain-xenial-7
+#         # - george-edison55-precise-backports # cmake 3.2 とかを入れるのに使う
+#     packages:
+#       - g++-5
+#       - clang-7
+#       - libgtest-dev
+#       - python3-dev
+
+# matrix:
+#   include:
+#     - compiler: gcc
+#       env:
+#         - COMPILER=g++-5
+#     - compiler: clang
+#       env:
+#         - COMPILER=clang++-7
 
 before_install:
-# The Travis VM image for Mac already has a link at /usr/local/include/c++,
-# causing Homebrew's gcc installation to error out. This was reported to
-# Homebrew maintainers at https://github.com/Homebrew/brew/issues/1742 and
-# removing the link emerged as a workaround.
-- if [ "$TRAVIS_OS_NAME" == "osx" ]; then rm -f /usr/local/include/c++ ; fi
-
-install:
-# /usr/bin/gcc is stuck to old versions on both Linux and OSX.
-- if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
-- echo ${CC}
-- echo ${CXX}
-- ${CXX} --version
-- cmake --version
+  - pip install --user gcovr
+  - pip install --user cpp-coveralls
 
 before_script:
-- mkdir -p build && cd build
-- cmake .. -G Ninja -DCRC32C_USE_GLOG=$GLOG -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-           -DBUILD_SHARED_LIBS=$SHARED_LIB -DCMAKE_POSITION_INDEPENDENT_CODE=$PIC
-- cmake --build .
-- cd ..
-
+  - install -d gtest_build
+  - pushd gtest_build
+  - cmake -DCMAKE_CXX_COMPILER=$COMPILER /usr/src/gtest/
+  - make
+  - sudo cp *.a /usr/lib
+  - popd
+  - rm gtest_build -rf
 script:
-- build/crc32c_tests
-- build/crc32c_capi_tests
-- build/crc32c_bench
+  - cmake --version
+  - install -d build
+  - pushd build
+  - cmake -DCMAKE_CXX_COMPILER=$COMPIER ..
+  - make VERBOSE=1
+
+  # make test だと結果が表示されない
+  # 失敗したものだけ表示するなら --output-on-failure
+  - ctest -V
+
+  # popするのは大事
+  - popd
+after_success:
+  - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
+
