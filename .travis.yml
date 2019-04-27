@@ -25,8 +25,8 @@ matrix:
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
             - llvm-toolchain-xenial-7
+            - ubuntu-toolchain-r-test
           packages:
             - clang-7
             - libgtest-dev
@@ -38,7 +38,6 @@ before_install:
   - pip install --user cpp-coveralls
 
 before_script:
-  - sudo apt-get install libgtest-dev
   - install -d gtest_build
   - pushd gtest_build
   - cmake -DCMAKE_CXX_COMPILER=$COMPILER /usr/src/gtest/
