@@ -12,6 +12,7 @@
 
 dist: xenial
 language: cpp
+sudo: required
 
 compiler:
   - gcc
@@ -50,7 +51,6 @@ os:
 #   - osx
 # language: cpp
 #
-# sudo: required
 #
 # compiler:
 #   - gcc
