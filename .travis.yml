@@ -66,6 +66,6 @@ script:
 after_success:
   # - if [ $COVERAGE = 1 ]; then coveralls -e test -b build --gcov-options '\-lp'; fi
   # - if [ $COVERAGE = 1 ]; then coveralls -e test -b build --gcov-options '\-lp'; fi
-  - if [ $COVERAGE = 1 ]; then coveralls -e test -E ".*\/build\/.*\.(cpp|cxx)" --gcov-options '\-lp'; fi
+  - if [ $COVERAGE = 1 ]; then coveralls -e test -E "build\/.*\.(cpp|cxx)" -i src --gcov-options '\-lp'; fi
   # - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
 
