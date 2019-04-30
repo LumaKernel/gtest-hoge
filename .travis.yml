@@ -64,6 +64,6 @@ script:
   - popd
 
 after_success:
-  - if [ COVERAGE = 1 ]; then coveralls -e test -e build --gcov-options '\-lp'; fi
+  - if [ $COVERAGE = 1 ]; then coveralls -e test -e build --gcov-options '\-lp'; fi
   # - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
 
