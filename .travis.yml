@@ -31,6 +31,7 @@ matrix:
     - compiler: gcc
       env:
         - COMPILER=g++-5
+        - COVERAGE=1
     - compiler: clang
       env:
         - COMPILER=clang++-7
@@ -63,6 +64,6 @@ script:
   - popd
 
 after_success:
-  - coveralls -e test --gcov-options '\-lp'
+  - if [ COVERAGE = 1]; then coveralls -e test -e build --gcov-options '\-lp'; fi
   # - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
 
