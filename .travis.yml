@@ -5,11 +5,12 @@ dist: xenial
 language: cpp
 sudo: required
 
-compiler:
-  - gcc
-  - clang
 os:
   - linux
+
+env:
+  globa:
+    - GTEST_COLOR=1
 
 addons:
   apt:
@@ -29,11 +30,9 @@ matrix:
   include:
     - compiler: gcc
       env:
-        - GTEST_COLOR=1
         - COMPILER=g++-5
     - compiler: clang
       env:
-        - GTEST_COLOR=1
         - COMPILER=clang++-7
 
 install:
@@ -64,5 +63,6 @@ script:
   - popd
 
 after_success:
-  - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
+  - coveralls -e test --gcov-options '\-lp'
+  # - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
 
