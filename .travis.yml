@@ -96,31 +96,31 @@ matrix:
 install:
   - pip install --user gcovr
   - pip install --user cpp-coveralls
-#
-# before_script:
-#   - install -d gtest_build
-#   - pushd gtest_build
-#   - cmake -DCMAKE_CXX_COMPILER=$COMPILER /usr/src/gtest/
-#   - make
-#   - sudo cp *.a /usr/lib
-#   - popd
-#   - rm gtest_build -rf
-#
-# script:
-#   - cmake --version
-#   - install -d build
-#   - pushd build
-#   - cmake -DCMAKE_CXX_COMPILER=$COMPIER ..
-#   - make VERBOSE=1
-#
-#   # make test だと結果が表示されない
-#   # 失敗したものだけ表示するなら --output-on-failure
-#   - ctest -V
-#
-#   # popするのは大事
-#   - popd
-#
-# after_success:
-#   - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
+
+before_script:
+  - install -d gtest_build
+  - pushd gtest_build
+  - cmake -DCMAKE_CXX_COMPILER=$COMPILER /usr/src/gtest/
+  - make
+  - sudo cp *.a /usr/lib
+  - popd
+  - rm gtest_build -rf
+
+script:
+  - cmake --version
+  - install -d build
+  - pushd build
+  - cmake -DCMAKE_CXX_COMPILER=$COMPIER ..
+  - make VERBOSE=1
+
+  # make test だと結果が表示されない
+  # 失敗したものだけ表示するなら --output-on-failure
+  - ctest -V
+
+  # popするのは大事
+  - popd
+
+after_success:
+  - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
 
 
