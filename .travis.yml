@@ -10,6 +10,7 @@ os:
 
 env:
   global:
+    # CTest のため
     - GTEST_COLOR=1
 
 addons:
@@ -64,8 +65,6 @@ script:
   - popd
 
 after_success:
-  # - if [ $COVERAGE = 1 ]; then coveralls -e test -b build --gcov-options '\-lp'; fi
-  # - if [ $COVERAGE = 1 ]; then coveralls -e test -b build --gcov-options '\-lp'; fi
+  # out-of-source のための設定
   - if [ $COVERAGE = 1 ]; then coveralls -e test -E "build\/.*\.(cpp|cxx)" -i src --gcov-options '\-lp'; fi
-  # - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
 
