@@ -18,17 +18,9 @@ compiler:
   - clang
 os:
   - linux
-  - osx
 
 env:
   - GLOG=1 SHARED_LIB=0 BUILD_TYPE=Debug
-  - GLOG=1 SHARED_LIB=0 BUILD_TYPE=RelWithDebInfo
-  - GLOG=0 SHARED_LIB=0 BUILD_TYPE=Debug
-  - GLOG=0 SHARED_LIB=0 BUILD_TYPE=RelWithDebInfo
-  - GLOG=0 SHARED_LIB=1 BUILD_TYPE=Debug
-  - GLOG=0 SHARED_LIB=1 BUILD_TYPE=RelWithDebInfo
-  - GLOG=0 SHARED_LIB=0 PIC=1 BUILD_TYPE=Debug
-  - GLOG=0 SHARED_LIB=0 PIC=1 BUILD_TYPE=RelWithDebInfo
 
 
 matrix:
@@ -49,11 +41,6 @@ addons:
     - gcc-8
     - g++-8
     - ninja-build
-  homebrew:
-    packages:
-    - cmake
-    - gcc@8
-    - ninja
 
 
 
