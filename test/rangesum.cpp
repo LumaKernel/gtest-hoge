@@ -12,10 +12,8 @@ TEST(RangeSum, Small) {
 }
 
 TEST(RangeSum, ZeroStep) {
-  EXPECT_ANY_THROW({rangesum(3, 5, 0);});
-  EXPECT_ANY_THROW({rangesum(92, -23, 0);});
-
-  EXPECT_NO_THROW({rangesum(-231, -231, 0);});
+  EXPECT_DEATH( rangesum(3, 5, 0); , "");
+  EXPECT_DEATH( rangesum(92, -23, 0); , "");
 }
 
 TEST(RangeSum, SmallWithSteps) {

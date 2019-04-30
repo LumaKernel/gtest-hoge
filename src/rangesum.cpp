@@ -9,8 +9,8 @@ long long rangesum(long long l, long long r) {
 
 long long rangesum(long long l, long long r, long long step) {
   if(l == r) return l;
-  struct DO_NOT_ZEROSTEP_WITH_NONZERO_RANGE{} ex;
-  if(step == 0) throw ex;
+  // struct DO_NOT_ZEROSTEP_WITH_NONZERO_RANGE{} ex;
+  assert(step != 0);
   
   if(step > 0) {
     if(l > r) return l;
