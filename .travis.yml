@@ -1,12 +1,3 @@
-# 原因特定中
-# 問題点 : APT が実行されない
-
-# yml を変えるだけで解決する
-
-# os:linux が必要 ?
-# install 以下 + addons を動くやつに変える
-
-
 # 新しいバージョンのcmakeが欲しいから xenial を使う
 # cmake 3.12 以降が入っているはず
 
@@ -19,46 +10,6 @@ compiler:
   - clang
 os:
   - linux
-
-# env:
-#   - GLOG=1 SHARED_LIB=0 BUILD_TYPE=Debug
-
-# matrix:
-#   exclude:
-#     # GCC fails on recent Travis OSX images.
-#     # https://github.com/travis-ci/travis-ci/issues/9640
-#     - compiler: gcc
-#       os: osx
-
-# addons:
-#   apt:
-#     sources:
-#     - llvm-toolchain-xenial-7
-#     - ubuntu-toolchain-r-test
-#     packages:
-#     - clang-7
-#     - cmake
-#     - gcc-8
-#     - g++-8
-#     - ninja-build
-
-
-
-
-# dist: xenial\
-# os:
-#   - linux
-#   - osx
-# language: cpp
-#
-#
-# compiler:
-#   - gcc
-#   - clang
-
-env:
-  global:
-    - GTEST_COLOR=1
 
 addons:
   apt:
@@ -78,21 +29,13 @@ matrix:
   include:
     - compiler: gcc
       env:
+        - GTEST_COLOR=1
         - COMPILER=g++-5
     - compiler: clang
       env:
+        - GTEST_COLOR=1
         - COMPILER=clang++-7
 
-# addons:
-#   apt:
-#     sources:
-#       - llvm-toolchain-xenial-7
-#       - ubuntu-toolchain-r-test
-#     packages:
-#       - g++-5
-#       - clang-7
-#       - libgtest-dev
-#
 install:
   - pip install --user gcovr
   - pip install --user cpp-coveralls
@@ -122,5 +65,4 @@ script:
 
 after_success:
   - coveralls -E ".*\/build\/.*" -E ".*\/test\/.*" --gcov-options '\-lp'
-
 
