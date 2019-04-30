@@ -29,17 +29,17 @@ os:
 #     - compiler: gcc
 #       os: osx
 
-addons:
-  apt:
-    sources:
-    - llvm-toolchain-xenial-7
-    - ubuntu-toolchain-r-test
-    packages:
-    - clang-7
-    - cmake
-    - gcc-8
-    - g++-8
-    - ninja-build
+# addons:
+#   apt:
+#     sources:
+#     - llvm-toolchain-xenial-7
+#     - ubuntu-toolchain-r-test
+#     packages:
+#     - clang-7
+#     - cmake
+#     - gcc-8
+#     - g++-8
+#     - ninja-build
 
 
 
@@ -63,20 +63,20 @@ env:
     - COMPILER=g++-5
     - COMPILER=clang++-7
 
-# addons:
-#   apt:
-#     # update: true # apt update をしてくれる
-#     sources:
-#       # 特定のg++のバージョンを入れるのに必要
-#       # 実体は sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-#       - ubuntu-toolchain-r-test
-#       - llvm-toolchain-xenial-7
-#         # - george-edison55-precise-backports # cmake 3.2 とかを入れるのに使う
-#     packages:
-#       - g++-5
-#       - clang-7
-#       - libgtest-dev
-#       - python3-dev
+addons:
+  apt:
+    # update: true # apt update をしてくれる
+    sources:
+      # 特定のg++のバージョンを入れるのに必要
+      # 実体は sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-xenial-7
+        # - george-edison55-precise-backports # cmake 3.2 とかを入れるのに使う
+    packages:
+      - g++-5
+      - clang-7
+      - libgtest-dev
+      - python3-dev
 
 # matrix:
 #   include:
