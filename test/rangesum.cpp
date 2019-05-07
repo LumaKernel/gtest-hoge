@@ -12,8 +12,8 @@ TEST(RangeSum, Small) {
 }
 
 TEST(RangeSum, ZeroStep) {
-  EXPECT_DEATH( rangesum(3, 5, 0); , "");
-  EXPECT_DEATH( rangesum(92, -23, 0); , "");
+  EXPECT_DEATH( rangesum(3, 5, 0) , "");
+  EXPECT_DEATH( rangesum(92, -23, 0) , "");
 }
 
 TEST(RangeSum, SmallWithSteps) {
@@ -30,7 +30,7 @@ TEST(RangeSum, SmallWithSteps) {
   EXPECT_EQ(rangesum(-12, 12, 3), 0);
 }
 
-TEST(RangeSum, LARGE) {
+TEST(RangeSum, Large) {
   EXPECT_EQ(rangesum(1, 3000), 4501500);
   EXPECT_EQ(rangesum(-203, 49239), 1212243474ll);
   EXPECT_EQ(rangesum(-203, 49239, 17), 71314135);
