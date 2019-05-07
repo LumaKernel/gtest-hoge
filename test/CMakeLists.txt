@@ -11,7 +11,7 @@ foreach(test ${TESTS})
   target_link_libraries(${we} PRIVATE GTest::GTest GTest::Main)
   add_test(${we} ${we})
   list(APPEND TEST_NAMES ${we})
-  set_property(TEST ${we} PROPERTY TIMEOUT 5)
+  set_property(TEST ${we} PROPERTY TIMEOUT 120)
 endforeach()
 
 include(CodeCoverage)

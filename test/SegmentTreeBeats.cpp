@@ -40,8 +40,8 @@
 // #include<cstring>
 // #include<bits/stdc++.h>
 // }}}
-using namespace std;
-using ll = long long;
+// using namespace std;
+// using ll = long long;
 
 // #undef DEBUG
 #define DEBUG
@@ -176,8 +176,8 @@ template<class X>
 struct add_inf {
   using underlying_set = X;
   X value;
-  static const X positive_infinity = numeric_limits<X>::has_infinity ? numeric_limits<X>::infinity() : numeric_limits<X>::max();
-  static const X negative_infinity = numeric_limits<X>::has_infinity ? -numeric_limits<X>::infinity() : numeric_limits<X>::min();
+  static const X positive_infinity = std::numeric_limits<X>::has_infinity ? std::numeric_limits<X>::infinity() : std::numeric_limits<X>::max();
+  static const X negative_infinity = std::numeric_limits<X>::has_infinity ? -std::numeric_limits<X>::infinity() : std::numeric_limits<X>::min();
   operator X() { return value; }
   add_inf(const X &value = X()): value(value) { }
   X operator+(const add_inf &a) const {
@@ -191,10 +191,10 @@ struct add_inf {
     return value - a.value;
   }
   X operator*(const add_inf &a) const {
-    if(value == positive_infinity && a.value != negative_infinity) return positive_infinity;
-    if(value != negative_infinity && a.value == positive_infinity) return positive_infinity;
-    if(value == negative_infinity && a.value == negative_infinity) return positive_infinity;
-    if(value == negative_infinity || a.value == negative_infinity) return negative_infinity;
+    if(value == positive_infinity) return a.value < 0 ? negative_infinity : positive_infinity;
+    if(value == negative_infinity) return a.value < 0 ? positive_infinity : negative_infinity;
+    if(a.value == positive_infinity) return value < 0 ? negative_infinity : positive_infinity;
+    if(a.value == negative_infinity) return value < 0 ? positive_infinity : negative_infinity;
     return value * a.value;
   }
   X operator/(const add_inf &a) const {
@@ -217,8 +217,6 @@ struct add_inf {
     return *this = *this / a;
   }
   bool operator<(const add_inf &a) const {
-    if(value == negative_infinity || a.value == positive_infinity) return true;
-    if(value == positive_infinity || a.value == negative_infinity) return false;
     return value < a.value;
   }
   bool operator==(const add_inf &a) const {
@@ -239,9 +237,9 @@ struct add_inf {
   X operator-() const {
     if(value == positive_infinity) return negative_infinity;
     if(value == negative_infinity) return positive_infinity;
-    return add_inf(-value);
+    return -value;
   }
-  friend ostream& operator <<(std::ostream &os, const add_inf &a) {
+  friend std::ostream& operator <<(std::ostream &os, const add_inf &a) {
     os << a.value;
     return os;
   }
@@ -331,6 +329,9 @@ private:
     max1[k] += add[k];
     min0[k] += add[k];
     min1[k] += add[k];
+
+    assert(L[k] <= R[k]);
+
     assert(max1[k] < R[k]);
     if(R[k] < max0[k]) {
       if(min1[k] == max0[k]) min1[k] = R[k];
@@ -348,18 +349,18 @@ private:
     if(sz > 1) {
       add[2 * k + 1] += add[k]; // 可換則
       add[2 * k + 2] += add[k];
-      L[2 * k + 1] = min<X>(max<X>(L[2 * k + 1] + add[k], L[k]), R[k]);
-      R[2 * k + 1] = min<X>(max<X>(R[2 * k + 1] + add[k], L[k]), R[k]);
-      L[2 * k + 2] = min<X>(max<X>(L[2 * k + 2] + add[k], L[k]), R[k]);
-      R[2 * k + 2] = min<X>(max<X>(R[2 * k + 2] + add[k], L[k]), R[k]);
+      L[2 * k + 1] = std::min<X>(std::max<X>(L[2 * k + 1] + add[k], L[k]), R[k]);
+      R[2 * k + 1] = std::min<X>(std::max<X>(R[2 * k + 1] + add[k], L[k]), R[k]);
+      L[2 * k + 2] = std::min<X>(std::max<X>(L[2 * k + 2] + add[k], L[k]), R[k]);
+      R[2 * k + 2] = std::min<X>(std::max<X>(R[2 * k + 2] + add[k], L[k]), R[k]);
     }
-    add[k] = 0;
+    add[k] = identity;
     L[k] = negative_infinity;
     R[k] = positive_infinity;
   }
   void eval_down(size_type k, size_type sz) {
     assert(sz > 0);
-    vector<size_type> v({k});
+    std::vector<size_type> v({k});
     while(k) v.emplace_back(--k >>= 1), sz <<= 1;
     while(v.size()) eval(v.back(), sz), sz >>= 1, v.pop_back();
   }
@@ -372,12 +373,12 @@ private:
     *v1 = &max0[k * 2 + 2],
     *v2 = &max1[k * 2 + 1],
     *v3 = &max1[k * 2 + 2];
-    if(*v0 < *v1) swap(v0, v1), swap(cnt0, cnt1);
-    if(*v1 < *v2) swap(v1, v2);
-    if(*v1 < *v3) swap(v1, v3);
+    if(*v0 < *v1) std::swap(v0, v1), std::swap(cnt0, cnt1);
+    if(*v1 < *v2) std::swap(v1, v2);
+    if(*v1 < *v3) std::swap(v1, v3);
     max0[k] = *v0;
     max1[k] = *v1;
-    if(*v0 == *v1) cnt0 += cnt1, max1[k] = max(*v2, *v3);
+    if(*v0 == *v1) cnt0 += cnt1, max1[k] = std::max(*v2, *v3);
     cnt_max0[k] = cnt0;
   }
   // range of k > 1
@@ -388,23 +389,25 @@ private:
     *v1 = &min0[k * 2 + 2],
     *v2 = &min1[k * 2 + 1],
     *v3 = &min1[k * 2 + 2];
-    if(*v1 < *v0) swap(v0, v1), swap(cnt0, cnt1);
-    if(*v2 < *v1) swap(v1, v2);
-    if(*v3 < *v1) swap(v1, v3);
+    if(*v1 < *v0) std::swap(v0, v1), std::swap(cnt0, cnt1);
+    if(*v2 < *v1) std::swap(v1, v2);
+    if(*v3 < *v1) std::swap(v1, v3);
     min0[k] = *v0;
     min1[k] = *v1;
-    if(*v0 == *v1) cnt0 += cnt1, min1[k] = min(*v2, *v3);
+    if(*v0 == *v1) cnt0 += cnt1, min1[k] = std::min(*v2, *v3);
     cnt_min0[k] = cnt0;
   }
   // range of k > 1
+  // children must be evaled
   void update(size_type k) {
     update_min(k);
     update_max(k);
     data[k] = data[k * 2 + 1] + data[k * 2 + 2];
   }
   void update_up(size_type k) {
-    if(k < n - 1) update(k);
-    while(k) update(--k >>= 1);
+    assert(k >= n - 1);
+    size_type sz = 1;
+    while(k) --k >>= 1, eval(k * 2 + 1, sz), eval(k * 2 + 2, sz), update(k), sz <<= 1;
   }
 public:
   void set(size_type i, X x) {
@@ -413,7 +416,6 @@ public:
     eval_down(i, 1);
     data[i] = max0[i] = min0[i] = x;
     update_up(i);
-    // TODO
   }
   underlying_set get(size_type i) {
     assert(i < _size);
@@ -421,20 +423,26 @@ public:
     eval_down(i, 1);
     return data[i];
   }
-  void smin(index_type l, index_type r, const X& x) {
-    if(l < 0) l = 0;
-    if(r > static_cast<index_type>(_size)) r = _size;
-    if(l >= r) return;
-    smin(l, r, x, 0, 0, n);
+  void set_positive_infinity(index_type l, index_type r) {
+    select_max(l, r, positive_infinity);
   }
-  void smax(index_type l, index_type r, const X& x) {
+  void set_negative_infinity(index_type l, index_type r) {
+    select_min(l, r, negative_infinity);
+  }
+  void select_min(index_type l, index_type r, const X& x) {
     if(l < 0) l = 0;
     if(r > static_cast<index_type>(_size)) r = _size;
     if(l >= r) return;
-    smax(l, r, x, 0, 0, n);
+    select_min(l, r, x, 0, 0, n);
+  }
+  void select_max(index_type l, index_type r, const X& x) {
+    if(l < 0) l = 0;
+    if(r > static_cast<index_type>(_size)) r = _size;
+    if(l >= r) return;
+    select_max(l, r, x, 0, 0, n);
   }
 private:
-  void smin(size_type a, size_type b, const X & x, size_type k, size_type l, size_type r) {
+  void select_min(size_type a, size_type b, const X & x, size_type k, size_type l, size_type r) {
     eval(k, r - l);
     if(b <= l || r <= a || !(x < max0[k])) return;
     if(a <= l && r <= b && max1[k] < x) {
@@ -442,24 +450,24 @@ private:
       eval(k, r - l);
       return;
     }
-    smin(a, b, x, k * 2 + 1, l, (l + r) >> 1);
-    smin(a, b, x, k * 2 + 2, (l + r) >> 1, r);
+    select_min(a, b, x, k * 2 + 1, l, (l + r) >> 1);
+    select_min(a, b, x, k * 2 + 2, (l + r) >> 1, r);
     update(k);
   }
-  void smax(size_type a, size_type b, const X & x, size_type k, size_type l, size_type r) {
+  void select_max(size_type a, size_type b, const X & x, size_type k, size_type l, size_type r) {
     eval(k, r - l);
     if(b <= l || r <= a || !(min0[k] < x)) return;
-    // dump("smax", k, l, r, r - l, min0[k], min1[k], cnt_min0[k]);
+    // dump("select_max", k, l, r, r - l, min0[k], min1[k], cnt_min0[k]);
     if(a <= l && r <= b && x < min1[k]) {
       L[k] = x;
       eval(k, r - l);
-      // dump("smax R", k, l, r, r - l, min0[k], min1[k], max0[k], max1[k], cnt_min0[k]);
+      // dump("select_max R", k, l, r, r - l, min0[k], min1[k], max0[k], max1[k], cnt_min0[k]);
       return;
     }
-    smax(a, b, x, k * 2 + 1, l, (l + r) >> 1);
-    smax(a, b, x, k * 2 + 2, (l + r) >> 1, r);
+    select_max(a, b, x, k * 2 + 1, l, (l + r) >> 1);
+    select_max(a, b, x, k * 2 + 2, (l + r) >> 1, r);
     update(k);
-    // dump("smax Q", k, l, r, r - l, min0[k], min1[k], max0[k], max1[k], cnt_min0[k]);
+    // dump("select_max Q", k, l, r, r - l, min0[k], min1[k], max0[k], max1[k], cnt_min0[k]);
   }
 public:
   void range_add(index_type l, index_type r, const X &v) {
@@ -471,15 +479,18 @@ public:
 private:
   void range_add(size_type a, size_type b, const X &v, size_type k, size_type l, size_type r) {
     eval(k, r - l);
+    // dump("add", l, r, data[k], min0[k], min1[k], max0[k], max1[k], cnt_min0[k]);
     if(b <= l || r <= a) return;
     if(a <= l && r <= b) {
       add[k] = v;
       eval(k, r - l);
+      // dump("add R", l, r, data[k], min0[k], min1[k], max0[k], max1[k], cnt_min0[k]);
       return;
     }
     range_add(a, b, v, k * 2 + 1, l, (l + r) >> 1);
     range_add(a, b, v, k * 2 + 2, (l + r) >> 1, r);
     update(k);
+    // dump("add Q", l, r, data[k], min0[k], min1[k], max0[k], max1[k], cnt_min0[k]);
   }
 public:
   const X addition_identity = 0; // TODO
@@ -493,8 +504,9 @@ public:
 private:
   underlying_set range_sum(size_type a, size_type b, size_type k, size_type l, size_type r) {
     if(b <= l || r <= a) return identity;
+    // dump("sum", l, r, data[k], min0[k], min1[k], max0[k], max1[k]);
     eval(k, r - l);
-    // dump(k, l, r, min0[k], min1[k], max0[k], max1[k]);
+    // dump("sum", l, r, data[k], min0[k], min1[k], max0[k], max1[k]);
     if(a <= l && r <= b) return data[k];
     return range_sum(a, b, k * 2 + 1, l, (l + r) >> 1) + range_sum(a, b, k * 2 + 2, (l + r) >> 1, r);
   }
@@ -506,6 +518,7 @@ public:
 
 /// }}}--- ///
 
+using namespace std;
 #include "gtest/gtest.h"
 
 class BeatsTest : public ::testing::Test {
@@ -518,19 +531,20 @@ protected:
 
 template<class T>
 struct Naive {
-  vector<T> data;
+  std::vector<T> data;
   Naive(int n, T initial = 0): data(n, initial) { }
+  Naive(std::initializer_list<T> il): data(il.begin(), il.end()) { }
   void set(int i, T x) {
     data.at(i) = x;
   }
   T get(int i) {
     return data.at(i);
   }
-  void smin(int l, int r, T x) {
-    for(int i = l; i < r; i++) data.at(i) = min(data.at(i), x);
+  void select_min(int l, int r, T x) {
+    for(int i = l; i < r; i++) data.at(i) = std::min(data.at(i), x);
   }
-  void smax(int l, int r, T x) {
-    for(int i = l; i < r; i++) data.at(i) = max(data.at(i), x);
+  void select_max(int l, int r, T x) {
+    for(int i = l; i < r; i++) data.at(i) = std::max(data.at(i), x);
   }
   void range_add(int l, int r, T x) {
     for(int i = l; i < r; i++) data.at(i) += x;
@@ -540,10 +554,17 @@ struct Naive {
     for(int i = l; i < r; i++) s += data.at(i);
     return s;
   }
+  void set_positive_infinity(int l, int r) {
+    for(int i = l; i < r; i++) data.at(i) = T::positive_infinity;
+  }
+  void set_negative_infinity(int l, int r) {
+    for(int i = l; i < r; i++) data.at(i) = T::negative_infinity;
+  }
 };
 
 TEST(BeatsTest, Simple) {
   SegmentTreeBeats<add_inf<int>> a({7, 45, 2, 34, 23, 49 ,12 ,5});
+
   EXPECT_EQ(a.size(), 8);
   
   EXPECT_EQ(a.range_sum(2, 4), 36);
@@ -552,7 +573,7 @@ TEST(BeatsTest, Simple) {
   EXPECT_EQ(a.range_sum(4, 4), 0);
   EXPECT_EQ(a.get(6), 12);
   
-  a.smin(1, 4, 10);
+  a.select_min(1, 4, 10);
   // {7, 10, 2, 10, 23, 49 ,12 ,5}
   EXPECT_EQ(a.range_sum(2, 4), 12);
   EXPECT_EQ(a.range_sum(1, 5), 10 + 2 + 10 + 23);
@@ -562,7 +583,7 @@ TEST(BeatsTest, Simple) {
   EXPECT_EQ(a.get(3), 10);
   EXPECT_EQ(a.get(4), 23);
   
-  a.smax(3, 7, 13);
+  a.select_max(3, 7, 13);
   a.set(0, 3);
   // {3, 10, 2, 13, 23, 49 ,13 ,5}
   EXPECT_EQ(a.range_sum(2, 4), 2 + 13);
@@ -571,20 +592,32 @@ TEST(BeatsTest, Simple) {
   EXPECT_EQ(a.range_sum(4, 4), 0);
   EXPECT_EQ(a.get(6), 13);
   EXPECT_EQ(a.get(7), 5);
+
+  a.set(3, 5);
+  a.range_add(0, 7, -4);
+  // {-1, 6, -2, 1, 19, 45 ,9 ,5}
+  EXPECT_EQ(a.range_sum(2, 4), -1);
+  EXPECT_EQ(a.range_sum(1, 5), 6 - 2 + 1 + 19);
+  EXPECT_EQ(a.range_sum(0, 1), -1);
+  EXPECT_EQ(a.range_sum(4, 4), 0);
+  EXPECT_EQ(a.get(6), 9);
+  EXPECT_EQ(a.get(7), 5);
+
 }
 
-class BeatsSuite : public ::testing::TestWithParam<tuple<int, int, vector<int>>> {};
+class BeatsSuite : public ::testing::TestWithParam<std::tuple<int, int, int, std::vector<int>>> {};
 
 TEST_P(BeatsSuite, RandomMedium) {
 
-  int n, q;
+  int n, q, r;
   vector<int> distribution;
 
-  tie(n, q, distribution) = GetParam();
+  tie(n, q, r, distribution) = GetParam();
 
 
-  Naive<int> naive(n);
-  SegmentTreeBeats<add_inf<int>> beats(n);
+  Naive<add_inf<int>> naive(n);
+  using Seg = SegmentTreeBeats<add_inf<int>>;
+  Seg beats(n);
 
   std::cout << "n : " << n << std::endl;
 
@@ -593,19 +626,23 @@ TEST_P(BeatsSuite, RandomMedium) {
   vector<int> ops;
 
 
-  for(int i = 0; i < 6; i++) for(int j = 0; j < distribution[j]; j++) ops.push_back(i);
+  for(int i = 0; i < 6; i++) for(int j = 0; j < distribution[i]; j++) ops.push_back(i);
 
   uniform_int_distribution<int> rdop(0, ops.size() - 1);
   uniform_int_distribution<int> rdidx(0, n - 1);
-  uniform_int_distribution<int> rdnum(-5000, 5000);
+  uniform_int_distribution<int> rdnum(-r, r);
+  uniform_int_distribution<int> rd_sel_inf(0, 1);
+
+  map<int, int> counts;
 
   for(int i = 0; i < q; i++) {
     int l = rdidx(mt), r = rdidx(mt);
     if(l > r) swap(l, r);
     r++;
     int num = rdnum(mt);
-
-    switch(ops[rdop(mt)]) {
+    int op = ops[rdop(mt)];
+    counts[op]++;
+    switch(op) {
       case 0:
         // 0 : set
         naive.set(l, num);
@@ -631,17 +668,28 @@ TEST_P(BeatsSuite, RandomMedium) {
         break;
       case 4:
         // 4 : range_smin
-        naive.smin(l, r, num);
-        beats.smin(l, r, num);
+        naive.select_min(l, r, num);
+        beats.select_min(l, r, num);
         break;
       case 5:
         // 5 : range_smax
-        naive.smax(l, r, num);
-        beats.smax(l, r, num);
+        naive.select_max(l, r, num);
+        beats.select_max(l, r, num);
+        break;
+      case 6:
+        // 6 : set_negative_infinity
+        naive.set_negative_infinity(l, r);
+        beats.set_negative_infinity(l, r);
+        break;
+      case 7:
+        // 7 : set_positive_infinity
+        naive.set_positive_infinity(l, r);
+        beats.set_positive_infinity(l, r);
         break;
       default: FAIL() << "error";
     }
   }
+  ASSERT_EQ(beats.size(), n);
 }
 
 // 0 : set
@@ -651,12 +699,13 @@ TEST_P(BeatsSuite, RandomMedium) {
 // 4 : range_smin
 // 5 : range_smax
 
-INSTANTIATE_TEST_CASE_P(DISABLED_one, BeatsSuite, ::testing::Combine(
-    ::testing::Values(40, 5000),
-    ::testing::Values(5000),
+INSTANTIATE_TEST_CASE_P(one, BeatsSuite, ::testing::Combine(
+    ::testing::Values(1, 40, 1000),
+    ::testing::Values(2000),
+    ::testing::Values(1000),
     ::testing::Values(
-      vector<int>({2, 2, 3, 3, 1, 1}),
-      vector<int>({2000, 2000, 1000, 1000, 1, 1})
+      vector<int>({2, 2, 3, 3, 1, 1, 1, 1}),
+      vector<int>({100, 100, 70, 70, 3, 3, 1, 1})
       )
     )
   );
