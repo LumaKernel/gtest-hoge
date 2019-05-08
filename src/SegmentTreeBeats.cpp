@@ -39,8 +39,8 @@
 // #include<cstring>
 // #include<bits/stdc++.h>
 // }}}
-using namespace std;
-using ll = long long;
+// using namespace std;
+// using ll = long long;
 
 // #undef DEBUG
 #define DEBUG
@@ -169,35 +169,38 @@ namespace std {
   };
 }
 
+/// --- SegmentTree Beats {{{ ///
+
 template<class X>
 struct add_inf {
   using underlying_set = X;
   X value;
-  static const X positive_infinity = numeric_limits<X>::has_infinity ? numeric_limits<X>::infinity() : numeric_limits<X>::max();
-  static const X negative_infinity = numeric_limits<X>::has_infinity ? -numeric_limits<X>::infinity() : numeric_limits<X>::min();
-  operator X() { return value; }
+  static const X positive_infinity = std::numeric_limits<X>::has_infinity ? std::numeric_limits<X>::infinity() : std::numeric_limits<X>::max();
+  static const X negative_infinity = std::numeric_limits<X>::has_infinity ? -std::numeric_limits<X>::infinity() : std::numeric_limits<X>::min();
+  explicit operator X() { return value; }
   add_inf(const X &value = X()): value(value) { }
-  X operator+(const add_inf &a) const {
+  add_inf operator+(const add_inf &a) const {
     if(value == positive_infinity || a.value == positive_infinity) return positive_infinity;
     if(value == negative_infinity || a.value == negative_infinity) return negative_infinity;
     return value + a.value;
   }
-  X operator-(const add_inf &a) const {
+  add_inf operator-(const add_inf &a) const {
     if(value == positive_infinity || a.value == negative_infinity) return positive_infinity;
     if(value == negative_infinity || a.value == positive_infinity) return negative_infinity;
     return value - a.value;
   }
-  X operator*(const add_inf &a) const {
-    if(value == positive_infinity && a.value != negative_infinity) return positive_infinity;
-    if(value != negative_infinity && a.value == positive_infinity) return positive_infinity;
-    if(value == negative_infinity && a.value == negative_infinity) return positive_infinity;
-    if(value == negative_infinity || a.value == negative_infinity) return negative_infinity;
+  add_inf operator*(const add_inf &a) const {
+    if(value == positive_infinity) return a.value < 0 ? negative_infinity : positive_infinity;
+    if(value == negative_infinity) return a.value < 0 ? positive_infinity : negative_infinity;
+    if(a.value == positive_infinity) return value < 0 ? negative_infinity : positive_infinity;
+    if(a.value == negative_infinity) return value < 0 ? positive_infinity : negative_infinity;
+    if(value == 0 || a.value == 0) return 0;
     return value * a.value;
   }
-  // TODO
-  X operator/(const add_inf &a) const {
-    if(value == positive_infinity || a.value == negative_infinity) return positive_infinity;
-    if(value == negative_infinity || a.value == positive_infinity) return negative_infinity;
+  add_inf operator/(const add_inf &a) const {
+    if(a.value == positive_infinity || a.value == negative_infinity) return 0;
+    if(value == positive_infinity) return a.value < 0 ? negative_infinity : positive_infinity;
+    if(value == negative_infinity) return a.value < 0 ? positive_infinity : negative_infinity;
     return value / a.value;
   }
   add_inf& operator+=(const add_inf &a) {
@@ -213,8 +216,6 @@ struct add_inf {
     return *this = *this / a;
   }
   bool operator<(const add_inf &a) const {
-    if(value == negative_infinity || a.value == positive_infinity) return true;
-    if(value == positive_infinity || a.value == negative_infinity) return false;
     return value < a.value;
   }
   bool operator==(const add_inf &a) const {
@@ -235,9 +236,9 @@ struct add_inf {
   X operator-() const {
     if(value == positive_infinity) return negative_infinity;
     if(value == negative_infinity) return positive_infinity;
-    return add_inf(-value);
+    return -value;
   }
-  friend ostream& operator <<(std::ostream &os, const add_inf &a) {
+  friend std::ostream& operator <<(std::ostream &os, const add_inf &a) {
     os << a.value;
     return os;
   }
@@ -267,7 +268,7 @@ private:
 
   // laz
   // 1) add x
-  std::vector<X> add;
+  std::vector<X> lazy_add;
   // 2) clamp [L, R]
   std::vector<X> L;
   std::vector<X> R;
@@ -278,7 +279,7 @@ private:
 public:
   SegmentTreeBeats(size_type t, X initial = 0) {
     _reset(t, initial);
-    for(size_type i = n - 2; i--; ) update(i);
+    for(size_type i = n - 1; i--; ) update(i);
   }
   template<class InputIter, class = typename std::iterator_traits<InputIter>::value_type>
   SegmentTreeBeats(InputIter first, InputIter last) {
@@ -286,12 +287,12 @@ public:
     for(std::size_t i = n - 1; first != last; ++i, ++first) {
       max0[i] = min0[i] = data[i] = *first;
     }
-    for(std::size_t i = n - 2; i--; ) update(i);
+    for(std::size_t i = n - 1; i--; ) update(i);
   }
   template<class T>
   SegmentTreeBeats(std::initializer_list<T> il): SegmentTreeBeats(il.begin(), il.end()) { }
 private:
-  void _resize(size_type t, const X &initial = X(0)) {
+  void _reset(size_type t, const X &initial = X(0)) {
     _size = t;
     n = 1;
     while(n < t) n <<= 1;
@@ -302,7 +303,7 @@ private:
     min1.resize(2 * n - 1, positive_infinity);
     cnt_max0.resize(2 * n - 1, 1);
     cnt_min0.resize(2 * n - 1, 1);
-    add.resize(2 * n - 1, identity);
+    lazy_add.resize(2 * n - 1, identity);
     L.resize(2 * n - 1, negative_infinity);
     R.resize(2 * n - 1, positive_infinity);
   }
@@ -318,79 +319,94 @@ private:
 =>
 
 1) add x + y
-2) clamp [max(l + y, s), min(r + y, t)]
+2) clamp [clamp(l + y, [s, t]), clamp(r + y, [s, t])]
    */
   void eval(size_type k, size_type sz) {
-    data[k] += add[k] * static_cast<X>(sz);
-    max0[k] += add[k];
-    max1[k] += add[k];
-    min0[k] += add[k];
-    min1[k] += add[k];
+    assert(sz > 0);
+    data[k] += lazy_add[k] * static_cast<X>(sz);
+    max0[k] += lazy_add[k];
+    max1[k] += lazy_add[k];
+    min0[k] += lazy_add[k];
+    min1[k] += lazy_add[k];
+
+    assert(L[k] <= R[k]);
+
+    assert(max1[k] < R[k]);
     if(R[k] < max0[k]) {
       if(min1[k] == max0[k]) min1[k] = R[k];
-      data[k] -= (max0[k] - R[k]) * static_cast<X>(sz); // TODO : 考察，ここの前提条件
+      else if(min0[k] == max0[k]) min0[k] = R[k];
+      data[k] -= (max0[k] - R[k]) * static_cast<X>(cnt_max0[k]); // TODO : 考察，ここの前提条件
       max0[k] = R[k];
     }
+    assert(L[k] < min1[k]);
     if(min0[k] < L[k]) {
       if(max1[k] == min0[k]) max1[k] = L[k];
-      data[k] += (L[k] - min0[k]) * static_cast<X>(sz);
+      else if(max0[k] == min0[k]) max0[k] = L[k];
+      data[k] += (L[k] - min0[k]) * static_cast<X>(cnt_min0[k]);
       min0[k] = L[k];
     }
     if(sz > 1) {
-      add[2 * k + 1] += add[k]; // 可換則
-      add[2 * k + 2] += add[k];
-      L[2 * k + 1] = max<X>(L[2 * k + 1] + add[k], L[k]);
-      R[2 * k + 1] = max<X>(R[2 * k + 1] + add[k], R[k]);
-      L[2 * k + 2] = max<X>(L[2 * k + 2] + add[k], L[k]);
-      R[2 * k + 2] = max<X>(R[2 * k + 2] + add[k], R[k]);
+      lazy_add[2 * k + 1] += lazy_add[k]; // 可換則
+      lazy_add[2 * k + 2] += lazy_add[k];
+      L[2 * k + 1] = std::min<X>(std::max<X>(L[2 * k + 1] + lazy_add[k], L[k]), R[k]);
+      R[2 * k + 1] = std::min<X>(std::max<X>(R[2 * k + 1] + lazy_add[k], L[k]), R[k]);
+      L[2 * k + 2] = std::min<X>(std::max<X>(L[2 * k + 2] + lazy_add[k], L[k]), R[k]);
+      R[2 * k + 2] = std::min<X>(std::max<X>(R[2 * k + 2] + lazy_add[k], L[k]), R[k]);
     }
+    lazy_add[k] = identity;
+    L[k] = negative_infinity;
+    R[k] = positive_infinity;
   }
   void eval_down(size_type k, size_type sz) {
-    vector<size_type> v({k});
+    assert(sz > 0);
+    std::vector<size_type> v({k});
     while(k) v.emplace_back(--k >>= 1), sz <<= 1;
-    eval(0, sz);
-    while(v.size()) sz >>= 1, eval(v.back(), sz), v.pop_back();
+    while(v.size()) eval(v.back(), sz), sz >>= 1, v.pop_back();
   }
 private:
   // range of k > 1
   void update_max(size_type k) {
+    assert(k < n - 1);
     size_type cnt0 = cnt_max0[k * 2 + 1], cnt1 = cnt_max0[k * 2 + 2];
     X *v0 = &max0[k * 2 + 1],
     *v1 = &max0[k * 2 + 2],
     *v2 = &max1[k * 2 + 1],
     *v3 = &max1[k * 2 + 2];
-    if(*v0 < *v1) swap(v0, v1), swap(cnt0, cnt1);
-    if(*v1 < *v2) swap(v1, v2);
-    if(*v1 < *v3) swap(v1, v3);
+    if(*v0 < *v1) std::swap(v0, v1), std::swap(cnt0, cnt1);
+    if(*v1 < *v2) std::swap(v1, v2);
+    if(*v1 < *v3) std::swap(v1, v3);
     max0[k] = *v0;
     max1[k] = *v1;
-    if(*v0 == *v1) cnt0 += cnt1;
+    if(*v0 == *v1) cnt0 += cnt1, max1[k] = std::max(*v2, *v3);
     cnt_max0[k] = cnt0;
   }
   // range of k > 1
   void update_min(size_type k) {
+    assert(k < n - 1);
     size_type cnt0 = cnt_min0[k * 2 + 1], cnt1 = cnt_min0[k * 2 + 2];
     X *v0 = &min0[k * 2 + 1],
     *v1 = &min0[k * 2 + 2],
     *v2 = &min1[k * 2 + 1],
     *v3 = &min1[k * 2 + 2];
-    if(*v1 < *v0) swap(v0, v1);
-    if(*v2 < *v1) swap(v1, v2);
-    if(*v3 < *v1) swap(v1, v3);
+    if(*v1 < *v0) std::swap(v0, v1), std::swap(cnt0, cnt1);
+    if(*v2 < *v1) std::swap(v1, v2);
+    if(*v3 < *v1) std::swap(v1, v3);
     min0[k] = *v0;
     min1[k] = *v1;
-    if(*v0 == *v1) cnt0 += cnt1;
+    if(*v0 == *v1) cnt0 += cnt1, min1[k] = std::min(*v2, *v3);
     cnt_min0[k] = cnt0;
   }
   // range of k > 1
+  // children must be evaled
   void update(size_type k) {
     update_min(k);
     update_max(k);
     data[k] = data[k * 2 + 1] + data[k * 2 + 2];
   }
   void update_up(size_type k) {
-    update(k);
-    while(k) update(--k >>= 1);
+    assert(k >= n - 1);
+    size_type sz = 1;
+    while(k) --k >>= 1, eval(k * 2 + 1, sz), eval(k * 2 + 2, sz), update(k), sz <<= 1;
   }
 public:
   void set(size_type i, X x) {
@@ -399,94 +415,101 @@ public:
     eval_down(i, 1);
     data[i] = max0[i] = min0[i] = x;
     update_up(i);
-    // TODO
   }
   underlying_set get(size_type i) {
     assert(i < _size);
     i += n - 1;
     eval_down(i, 1);
-    return data[i];
+    return static_cast<underlying_set>(data[i]);
   }
-  void smin(index_type l, index_type r, const X& x) {
+  void select_min(index_type l, index_type r, const X& x) {
+    assert(x != negative_infinity);
     if(l < 0) l = 0;
     if(r > static_cast<index_type>(_size)) r = _size;
     if(l >= r) return;
-    smin(l, r, x, 0, 0, n);
+    select_min(l, r, x, 0, 0, n);
   }
-  void smax(index_type l, index_type r, const X& x) {
+  void select_max(index_type l, index_type r, const X& x) {
+    assert(x != positive_infinity);
     if(l < 0) l = 0;
     if(r > static_cast<index_type>(_size)) r = _size;
     if(l >= r) return;
-    smin(l, r, x, 0, 0, n);
+    select_max(l, r, x, 0, 0, n);
+  }
+  void clamp(index_type l, index_type r, const X& a, const X& b) {
+    assert(!(b < a));
+    select_max(l, r, a);
+    select_min(l, r, b);
+  }
+  void set(index_type l, index_type r, const X& x) {
+    select_max(l, r, x);
+    select_min(l, r, x);
   }
 private:
-  void smin(size_type a, size_type b, const X & x, size_type k, size_type l, size_type r) {
+  void select_min(size_type a, size_type b, const X & x, size_type k, size_type l, size_type r) {
     eval(k, r - l);
-    dump(k, l, r, max0[k]);
     if(b <= l || r <= a || !(x < max0[k])) return;
     if(a <= l && r <= b && max1[k] < x) {
       R[k] = x;
       eval(k, r - l);
       return;
     }
-    smin(l, r, x, k * 2 + 1, l, (l + r) >> 1);
-    smin(l, r, x, k * 2 + 2, (l + r) >> 1, r);
+    select_min(a, b, x, k * 2 + 1, l, (l + r) >> 1);
+    select_min(a, b, x, k * 2 + 2, (l + r) >> 1, r);
     update(k);
   }
-  void smax(size_type a, size_type b, const X & x, size_type k, size_type l, size_type r) {
+  void select_max(size_type a, size_type b, const X & x, size_type k, size_type l, size_type r) {
     eval(k, r - l);
     if(b <= l || r <= a || !(min0[k] < x)) return;
     if(a <= l && r <= b && x < min1[k]) {
       L[k] = x;
       eval(k, r - l);
-      // if(!(max0[k] < min0[k]) && !(min0[k] < max0[k])) max0[k] = x;
-      // else if(!(max1[k] < min0[k]) && !(min0[k] < max1[k])) max1[k] = x;
-      // min0[k] = x;
-      // eval(k, r - l);
       return;
     }
-    smax(l, r, x, k * 2 + 1, l, (l + r) >> 1);
-    smax(l, r, x, k * 2 + 2, (l + r) >> 1, r);
+    select_max(a, b, x, k * 2 + 1, l, (l + r) >> 1);
+    select_max(a, b, x, k * 2 + 2, (l + r) >> 1, r);
     update(k);
   }
 public:
-  void range_add(index_type l, index_type r, const X &v) {
+  void add(index_type l, index_type r, const X &v) {
     if(l < 0) l = 0;
     if(r > static_cast<index_type>(_size)) r = _size;
     if(l >= r) return;
-    range_add(l, r, v, 0, 0, n);
+    add(l, r, v, 0, 0, n);
   }
 private:
-  void range_add(size_type a, size_type b, const X &v, size_type k, size_type l, size_type r) {
+  void add(size_type a, size_type b, const X &v, size_type k, size_type l, size_type r) {
     eval(k, r - l);
     if(b <= l || r <= a) return;
     if(a <= l && r <= b) {
-      add[k] = v;
+      lazy_add[k] = v;
       eval(k, r - l);
       return;
     }
-    range_add(l, r, v, k * 2 + 1, l, (l + r) >> 1);
-    range_add(l, r, v, k * 2 + 2, (l + r) >> 1, r);
+    add(a, b, v, k * 2 + 1, l, (l + r) >> 1);
+    add(a, b, v, k * 2 + 2, (l + r) >> 1, r);
     update(k);
   }
 public:
-  const X addition_identity = 0; // TODO
-  underlying_set range_sum(index_type l, index_type r) {
+  underlying_set sum(index_type l, index_type r) {
     if(l < 0) l = 0;
     if(r > static_cast<index_type>(_size)) r = _size;
-    if(l >= r) return X(0);
-    return range_sum(l, r, 0, 0, n);
+    if(l >= r) return 0;
+    return static_cast<underlying_set>(sum(l, r, 0, 0, n));
   }
 private:
-  underlying_set range_sum(size_type a, size_type b, size_type k, size_type l, size_type r) {
+  X sum(size_type a, size_type b, size_type k, size_type l, size_type r) {
     if(b <= l || r <= a) return identity;
     eval(k, r - l);
     if(a <= l && r <= b) return data[k];
-    return range_sum(a, b, k * 2 + 1, l, (l + r) >> 1) + range_sum(a, b, k * 2 + 2, (l + r) >> 1, r);
+    return sum(a, b, k * 2 + 1, l, (l + r) >> 1) + sum(a, b, k * 2 + 2, (l + r) >> 1, r);
   }
 public:
   size_type size() {
     return _size;
   }
 };
+
+/// }}}--- ///
+
 
